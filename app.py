@@ -84,7 +84,7 @@ def queryData():
 # at the very bottom, test to see if that value that __name__ value is equal to __main. because that means it's the script that's going to be executed.
 # if condition is met, then just run the application. so this code here will actually start the application.
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=80, debug=True)
 
 
 # when you type python3 application.py in terminal, you will see it started running on port 5000. (= web server is running)
