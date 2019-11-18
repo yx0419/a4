@@ -37,6 +37,7 @@
     It is sending request to the url/endpoint: "http://127.0.0.1:5000/load". And server will see and there is a match
     with path /load. so will execute @app.route('/load') def loadData(): this part. So it will copy S3 to my S3 and load to DB. -->
     <script>
+        var host = '127.0.0.1:5000'
         function loadData() {
             document.getElementById("afterclickload").innerHTML = "Loading the data from S3 to DynamoDB..."
 
@@ -48,7 +49,7 @@
                 }
             };
 
-            var url = "http://127.0.0.1:5000/load";
+            var url = `http://${host}/load`;
             httpRequest.open("POST", url, true);
             httpRequest.send();
         }
@@ -67,7 +68,7 @@
                     }
                 }
             };
-            var url = "http://127.0.0.1:5000/clear";
+            var url = `http://${host}/clear`;
             httpRequest.open("DELETE", url, true);
             httpRequest.send();
         }
@@ -89,7 +90,7 @@
             var httpRequest = new XMLHttpRequest();
             // query string parameter and url of the api gateway that connect to a lambda function
 
-            var url = "http://127.0.0.1:5000/queryData?arg1=" + firstName + "&arg2=" + lastName;
+            var url = `http://${host}/queryData?arg1=` + firstName + "&arg2=" + lastName;
 
             httpRequest.open("GET", url, true);
             httpRequest.onreadystatechange = function () {
