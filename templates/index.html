@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>MyFlaskApp</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+</head>
+
+<body>
+    <h1>Program 4 Web App</h1>
+
+    <button onclick="loadData()">Load Data</button>
+
+    <p id="afterclickload" style="color:green;"></p>
+
+    <form id="queryForm" name="queryForm">
+        First name:<br>
+        <input id="fname" type="text" name="firstName" value="" /><br>
+        Last name:<br>
+        <input id="lname" type="text" name="lastName" value="" /><br><br>
+
+
+    </form>
+
+    <button onclick="queryData()">Query Data</button>
+
+    <button onclick="clearData()">Clear Data</button>
+
+
+    <p id="response" style="color:green;"></p>
+
+
+    <div id="clearInfo" style="color:green;"></div>
+
+    <!-- What this javascript is doing here is: As a "client", it is sending http request to the web server called "app.py".
+    It is sending request to the url/endpoint: "http://127.0.0.1:5000/load". And server will see and there is a match
+    with path /load. so will execute @app.route('/load') def loadData(): this part. So it will copy S3 to my S3 and load to DB. -->
+    <script>
+        function loadData() {
+            document.getElementById("afterclickload").innerHTML = "Loading the data from S3 to DynamoDB..."
+
+            var httpRequest = new XMLHttpRequest();
+            httpRequest.onreadystatechange = function () {
+                if (httpRequest.readyState == 4 && httpRequest.status == 200) {
+                    document.getElementById("afterclickload").innerHTML = "Loading data Completed."
+
+                }
+            };
+
+            var url = "http://127.0.0.1:5000/load";
+            httpRequest.open("POST", url, true);
+            httpRequest.send();
+        }
+        //why "loadData" doesn't need query parameter: because didn't want to pass data that is from client(browser) to server.
+
+        function clearData() {
+            var clearInfo = document.getElementById('clearInfo');
+
+            var httpRequest = new XMLHttpRequest();
+            httpRequest.onreadystatechange = function () {
+                if (this.readyState == 4) {
+                    if (this.status == 200) {
+                        clearInfo.innerHTML = "S3 data and Table from DB has been cleared.";
+                    } else {
+                        clearInfo.innerHTML = "There is no table so cannot remove.";
+                    }
+                }
+            };
+            var url = "http://127.0.0.1:5000/clear";
+            httpRequest.open("DELETE", url, true);
+            httpRequest.send();
+        }
+
+
+
+        //why "queryData" need query parameter: because need to pass data that is from client(browser)(which is last name, firstname that user typed) to server.
+        function queryData() {
+            var firstName = document.forms["queryForm"]["fname"].value.trim();
+            var lastName = document.forms["queryForm"]["lname"].value.trim();
+
+            document.getElementById("response").innerHTML = "Querying data for first name: " + firstName + " and last name: " + lastName;
+
+            if (firstName == "" && lastName == "") { // Does not allow empty input
+                alert("Require at least 1 input");
+                return false;
+            }
+
+            var httpRequest = new XMLHttpRequest();
+            // query string parameter and url of the api gateway that connect to a lambda function
+
+            var url = "http://127.0.0.1:5000/queryData?arg1=" + firstName + "&arg2=" + lastName;
+
+            httpRequest.open("GET", url, true);
+            httpRequest.onreadystatechange = function () {
+                if (this.readyState == 4 && this.status == 200) {
+                    var json = JSON.parse(httpRequest.response);//json means object, not string
+                    str = "";
+                    //document.getElementById("response").innerHTML = json.Item.first_name + json.Item.last_name + json.Item.id;
+                    for (const person of json) {
+                        var personStr = ''
+                        for (const key in person) {
+                            personStr += `${key}: ${person[key]} `
+                        }
+                        str += personStr + '<br/>'
+                    }
+
+                    document.getElementById("response").innerHTML = str;
+                }
+            };
+
+            httpRequest.send();
+        }
+    </script>
+</body>
+
+</html>
+
+<!-- use 127.0.0.1:5000 instead of localhost:5000 -->
